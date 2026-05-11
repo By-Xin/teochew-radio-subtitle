@@ -129,6 +129,15 @@ python scripts/evaluate_asr_manifest.py `
   --output-dir outputs/eval_val_10
 ```
 
+分析预测错误：
+
+```powershell
+python scripts/analyze_predictions.py `
+  --predictions outputs/eval_val_10/predictions.jsonl `
+  --manifest data/teochew_wild/prepared/splits/val.jsonl `
+  --output-dir outputs/eval_val_10_analysis
+```
+
 ## 可选普通话翻译
 
 配置 OpenAI-compatible API key：
