@@ -56,6 +56,12 @@ python scripts/radio_subtitle_pipeline.py record --seconds 30 --output outputs/r
 python scripts/radio_subtitle_pipeline.py run --seconds 30 --output-dir outputs/radio_16543
 ```
 
+如果电台里有音乐或静音，建议先打开轻量 VAD：
+
+```powershell
+python scripts/radio_subtitle_pipeline.py run --seconds 30 --vad --output-dir outputs/radio_16543_vad
+```
+
 输出文件：
 
 - `stream.json`: 电台与流信息
@@ -64,6 +70,28 @@ python scripts/radio_subtitle_pipeline.py run --seconds 30 --output-dir outputs/
 - `asr_raw.json`: 模型原始输出
 - `segments.json`: 归一化字幕段
 - `teochew.srt`: 潮汕语字幕
+- `vad_segments.json`: 开启 `--vad` 时的人声候选片段
+
+## 本地音频输入
+
+用本地音频或视频文件验证模型效果，比直接监听音乐电台更可靠：
+
+```powershell
+python scripts/radio_subtitle_pipeline.py file `
+  --input D:\path\to\sample.mp3 `
+  --output-dir outputs/local_sample `
+  --vad
+```
+
+只测试前 60 秒：
+
+```powershell
+python scripts/radio_subtitle_pipeline.py file `
+  --input D:\path\to\sample.mp3 `
+  --max-seconds 60 `
+  --output-dir outputs/local_sample_60s `
+  --vad
+```
 
 ## 可选普通话翻译
 
@@ -87,8 +115,8 @@ python scripts/radio_subtitle_pipeline.py run `
 ## Milestone
 
 - M1: 离线短片段字幕链路，已跑通。
-- M2: 支持本地音频文件输入。
-- M3: 加入 VAD、静音过滤和音乐段过滤。
+- M2: 支持本地音频文件输入，已实现。
+- M3: 加入轻量 VAD/静音过滤，已实现第一版；音乐段过滤仍需加强。
 - M4: 准实时监听模式，按 5-10 秒窗口持续输出字幕。
 - M5: Web UI 或本地服务化部署。
 
