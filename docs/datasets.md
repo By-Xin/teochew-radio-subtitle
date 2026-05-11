@@ -71,6 +71,15 @@ The manifest format is one JSON object per line:
 
 For repeatable ASR evaluation, prefer the official split files under `prepared/splits/`. They are derived from `label_for_qwen_asr/{train,val,test}.jsonl` and enriched with speaker and pinyin fields from `annotation.txt`.
 
+Example evaluation:
+
+```powershell
+python scripts/evaluate_asr_manifest.py `
+  --manifest data/teochew_wild/prepared/splits/val.jsonl `
+  --limit 10 `
+  --output-dir outputs/eval_val_10
+```
+
 Observed dataset detail:
 
 - `annotation.txt` contains 12,501 rows.

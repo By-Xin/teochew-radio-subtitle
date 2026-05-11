@@ -229,6 +229,10 @@ def load_whisper_runtime(model_id: str) -> WhisperRuntime:
         model = WhisperForConditionalGeneration.from_pretrained(model_id, dtype=dtype)
     except TypeError:
         model = WhisperForConditionalGeneration.from_pretrained(model_id, torch_dtype=dtype)
+    model.generation_config.forced_decoder_ids = processor.get_decoder_prompt_ids(
+        language="chinese",
+        task="transcribe",
+    )
     model.to(device)
     model.eval()
     return WhisperRuntime(processor=processor, model=model, device=device, dtype=dtype)
@@ -245,19 +249,8 @@ def generate_whisper_text(
         return_tensors="pt",
     ).input_features
     features = features.to(device=runtime.device, dtype=runtime.dtype)
-    generate_attempts: list[dict[str, Any]] = [
-        {"max_new_tokens": 225, "language": "chinese", "task": "transcribe"},
-        {"max_new_tokens": 225, "language": "zh", "task": "transcribe"},
-        {"max_new_tokens": 225},
-    ]
-    last_error: Exception | None = None
-    for generate_kwargs in generate_attempts:
-        try:
-            predicted_ids = runtime.model.generate(features, **generate_kwargs)
-            return runtime.processor.batch_decode(predicted_ids, skip_special_tokens=True)[0].strip()
-        except Exception as exc:
-            last_error = exc
-    raise RuntimeError("Whisper generation failed.") from last_error
+    predicted_ids = runtime.model.generate(features, max_new_tokens=225)
+    return runtime.processor.batch_decode(predicted_ids, skip_special_tokens=True)[0].strip()
 
 
 def transcribe_whisper(

@@ -120,6 +120,15 @@ data/teochew_wild/prepared/splits/val.jsonl
 data/teochew_wild/prepared/splits/test.jsonl
 ```
 
+先跑一个小样本 baseline：
+
+```powershell
+python scripts/evaluate_asr_manifest.py `
+  --manifest data/teochew_wild/prepared/splits/val.jsonl `
+  --limit 10 `
+  --output-dir outputs/eval_val_10
+```
+
 ## 可选普通话翻译
 
 配置 OpenAI-compatible API key：
