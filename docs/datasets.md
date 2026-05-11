@@ -49,6 +49,9 @@ Generated files:
 - `data/teochew_wild/prepared/qwen_labels/train.jsonl`
 - `data/teochew_wild/prepared/qwen_labels/val.jsonl`
 - `data/teochew_wild/prepared/qwen_labels/test.jsonl`
+- `data/teochew_wild/prepared/splits/train.jsonl`
+- `data/teochew_wild/prepared/splits/val.jsonl`
+- `data/teochew_wild/prepared/splits/test.jsonl`
 
 The manifest format is one JSON object per line:
 
@@ -65,6 +68,14 @@ The manifest format is one JSON object per line:
 ```
 
 `audio_path` is only included when `--download-audio` is used.
+
+For repeatable ASR evaluation, prefer the official split files under `prepared/splits/`. They are derived from `label_for_qwen_asr/{train,val,test}.jsonl` and enriched with speaker and pinyin fields from `annotation.txt`.
+
+Observed dataset detail:
+
+- `annotation.txt` contains 12,501 rows.
+- `label_for_qwen_asr` contains 12,500 rows split as 11,000 train, 700 val, and 800 test.
+- The duplicated sample ID `S005F010C006` appears twice with different text fragments and is preserved in the official split manifests.
 
 ## License Note
 

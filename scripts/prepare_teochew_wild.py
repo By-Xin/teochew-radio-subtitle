@@ -171,6 +171,35 @@ def normalize_qwen_label_file(path: Path, split: str) -> list[dict[str, Any]]:
     return records
 
 
+def build_annotation_lookup(records: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
+    lookup: dict[str, list[dict[str, Any]]] = {}
+    for record in records:
+        lookup.setdefault(record["id"], []).append(record)
+    return lookup
+
+
+def enrich_split_records(
+    split_records: list[dict[str, Any]],
+    annotation_lookup: dict[str, list[dict[str, Any]]],
+    audio_root: Path | None,
+) -> list[dict[str, Any]]:
+    enriched: list[dict[str, Any]] = []
+    for split_record in split_records:
+        item = dict(split_record)
+        candidates = annotation_lookup.get(item["id"], [])
+        match = next((record for record in candidates if record["text"] == item["text"]), None)
+        if match is None and candidates:
+            match = candidates[0]
+        if match:
+            item["speaker"] = match["speaker"]
+            item["pinyin"] = match["pinyin"]
+            item["annotation_audio"] = match["audio"]
+        if audio_root:
+            item["audio_path"] = str((audio_root / item["audio"].lstrip("./")).resolve())
+        enriched.append(item)
+    return enriched
+
+
 def prepare_qwen_labels(repo_id: str, hf_dir: Path, out_dir: Path, token: str | None) -> dict[str, int]:
     counts: dict[str, int] = {}
     qwen_out_dir = out_dir / "qwen_labels"
@@ -179,6 +208,25 @@ def prepare_qwen_labels(repo_id: str, hf_dir: Path, out_dir: Path, token: str | 
         records = normalize_qwen_label_file(label_path, split)
         write_jsonl(records, qwen_out_dir / f"{split}.jsonl")
         counts[split] = len(records)
+    return counts
+
+
+def prepare_official_splits(
+    repo_id: str,
+    hf_dir: Path,
+    out_dir: Path,
+    token: str | None,
+    annotation_lookup: dict[str, list[dict[str, Any]]],
+    audio_root: Path | None,
+) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    split_out_dir = out_dir / "splits"
+    for split, filename in QWEN_LABEL_FILES.items():
+        label_path = download_hf_file(repo_id, filename, hf_dir, token)
+        split_records = normalize_qwen_label_file(label_path, split)
+        enriched = enrich_split_records(split_records, annotation_lookup, audio_root)
+        write_jsonl(enriched, split_out_dir / f"{split}.jsonl")
+        counts[split] = len(enriched)
     return counts
 
 
@@ -216,12 +264,21 @@ def main() -> None:
 
     speaker_info = load_speaker_info(speaker_info_path)
     records = enrich_with_audio_paths(load_annotations(annotation_path), audio_root)
+    annotation_lookup = build_annotation_lookup(records)
     manifest_path = out_dir / args.manifest_name
     write_jsonl(records, manifest_path)
 
     summary = summarize(records, speaker_info)
     if not args.skip_qwen_labels:
         summary["qwen_label_counts"] = prepare_qwen_labels(args.repo_id, hf_dir, out_dir, token)
+        summary["official_split_counts"] = prepare_official_splits(
+            args.repo_id,
+            hf_dir,
+            out_dir,
+            token,
+            annotation_lookup,
+            audio_root,
+        )
 
     (out_dir / "summary.json").write_text(
         json.dumps(summary, ensure_ascii=False, indent=2),

@@ -113,6 +113,13 @@ python scripts/prepare_teochew_wild.py `
 
 更多说明见 [docs/datasets.md](docs/datasets.md)。
 
+后续固定评测优先使用：
+
+```text
+data/teochew_wild/prepared/splits/val.jsonl
+data/teochew_wild/prepared/splits/test.jsonl
+```
+
 ## 可选普通话翻译
 
 配置 OpenAI-compatible API key：
