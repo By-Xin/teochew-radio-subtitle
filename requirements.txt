@@ -1,0 +1,8 @@
+accelerate
+imageio-ffmpeg
+librosa
+numpy
+requests
+soundfile
+torch
+transformers
