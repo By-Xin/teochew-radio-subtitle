@@ -93,6 +93,26 @@ python scripts/radio_subtitle_pipeline.py file `
   --vad
 ```
 
+## Teochew-Wild 数据准备
+
+`panlr/teochew_wild` 是当前项目的第一套固定评测语料。它是 Hugging Face gated dataset，需要先在网页上同意访问条款，并设置 `HF_TOKEN`。
+
+只准备标注 manifest：
+
+```powershell
+python scripts/prepare_teochew_wild.py --data-dir data/teochew_wild
+```
+
+下载并解压音频：
+
+```powershell
+python scripts/prepare_teochew_wild.py `
+  --data-dir data/teochew_wild `
+  --download-audio
+```
+
+更多说明见 [docs/datasets.md](docs/datasets.md)。
+
 ## 可选普通话翻译
 
 配置 OpenAI-compatible API key：

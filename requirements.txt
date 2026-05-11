@@ -1,4 +1,5 @@
 accelerate
+huggingface-hub
 imageio-ffmpeg
 librosa
 numpy
